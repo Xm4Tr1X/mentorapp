@@ -1,6 +1,6 @@
 import React from 'react'
 import { Form, Input, Button, Icon } from 'antd';
-import {addMentor, fetchMentors} from '../actions/mentors'
+import {addMentor, fetchMentors, updateMentor} from '../actions/mentors'
 
 function hasErrors(fieldsError) {
     return Object.keys(fieldsError).some(field => fieldsError[field]);
@@ -15,7 +15,12 @@ const MentorForm = (props) => {
         props.form.validateFields((err, values) => {
             if (!err) {
                 console.log('Received values of form: ', values);
-                addMentor(values).then(() => fetchMentors(props.setTableData));                
+                props.formData.id ===0 ?
+                addMentor(values).then(() => fetchMentors(props.setTableData))
+                : updateMentor(values, props.formData.id ).then(async () => {
+                    props.setFormData(props.initialFormState);
+                    await fetchMentors(props.setTableData);
+                });
                 props.setMentorFormDrawer(false);
             }
         });
@@ -25,6 +30,7 @@ const MentorForm = (props) => {
             <Form.Item validateStatus={nameError ? 'error' : ''} help={nameError || ''}>
                 {getFieldDecorator('name', {
                     rules: [{ required: true, message: 'Please input mentor\'s name!' }],
+                    initialValue: props.formData.name
                 })(
                     <Input
                         type="text"
@@ -34,7 +40,7 @@ const MentorForm = (props) => {
             </Form.Item>
             <Form.Item validateStatus={topicError ? 'error' : ''} help={topicError || ''}>
                 {getFieldDecorator('topic', {
-                    rules: [{ required: true, message: 'Please enter topic!' }],
+                    rules: [{ required: true, message: 'Please enter topic!' }]
                 })(
                     <Input
                         type="text"
@@ -44,12 +50,12 @@ const MentorForm = (props) => {
             </Form.Item>
             <Form.Item>
                 <Button type="primary" htmlType="submit" disabled={hasErrors(getFieldsError())}>
-                    Log in
+                    Submit
                 </Button>
             </Form.Item>
         </Form>
     );
-}
+};
 
 
 const WrappedForm = Form.create({ name: 'mentor-form' })(MentorForm);

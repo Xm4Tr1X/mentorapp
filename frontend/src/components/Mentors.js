@@ -1,24 +1,26 @@
-import React, { useEffect, useState } from 'react';
-import { Card, Row, Col, Table, Button, Drawer, Divider } from 'antd'
-import { fetchMentors, deleteMentor, editMentor } from '../actions/mentors'
+import React, {useEffect, useState} from 'react';
+import {Card, Row, Col, Table, Button, Drawer, Divider} from 'antd'
+import {fetchMentors, deleteMentor, editMentor} from '../actions/mentors'
 import MentorForm from './MentorForm'
 
 
 export default function Mentors() {
+    const initialFormState = {name: '', topic: '', id: 0};
     const [tasksDrawer, setTasksDrawer] = useState(false);
     const [mentorFormDrawer, setMentorFormDrawer] = useState(false);
     const [tableData, setTableData] = useState([]);
+    const [formData, setFormData] = useState(initialFormState);
     const columns = [
-        { title: "Name", dataIndex: "name" },
-        { title: "Topic", dataIndex: 'topic' },
+        {title: "Name", dataIndex: "name"},
+        {title: "Topic", dataIndex: 'topic'},
         {
-            title: "Actions", dataIndex: "_id", render: (id, record) => {
+            title: "Actions", dataIndex: "_id", render: (id) => {
                 return (
                     <React.Fragment>
-                        <a key="edit" onClick={(e) => handleAction(e, id, editMentor)}> Edit </a>
-                        <Divider type="vertical" />
-                        <a key="delete" onClick={(e) => handleAction(e, id, deleteMentor)}>Delete</a>
-                        <Divider type="vertical" />
+                        <a key="edit" onClick={(e) => handleEdit(e, id)}> Edit </a>
+                        <Divider type="vertical"/>
+                        <a key="delete" onClick={(e) => handleDelete(e, id)}>Delete</a>
+                        <Divider type="vertical"/>
                         <a key="view">Tasks</a>
                     </React.Fragment>
                 )
@@ -26,17 +28,24 @@ export default function Mentors() {
         }
     ];
     useEffect(() => {
-        fetchMentors(setTableData);
+        fetchMentors(setTableData).catch(e => console.log(e.message));
     }, []);
 
-    const handleAction = (e, id, action) => {
+    const handleDelete = (e, id) => {
         e.preventDefault();
-        action(id).then(() => fetchMentors(setTableData));
-    }
+        deleteMentor(id).then(() => fetchMentors(setTableData));
+    };
+    const handleEdit = async (e, id) => {
+        e.preventDefault();
+        const data = await editMentor(id);
+        console.log('Data =>', data);
+        setFormData(data);
+        setMentorFormDrawer(true);
+    };
+
     return (
         <React.Fragment>
             <Row>
-                <Col lg={24}></Col>
                 <Col lg={24}>
                     <Card title="Mentor List">
                         <Button onClick={() => setMentorFormDrawer(true)}>Add new</Button>
@@ -53,7 +62,9 @@ export default function Mentors() {
                 key="mentors" title="Mentor Form"
                 visible={mentorFormDrawer}
                 onClose={() => setMentorFormDrawer(false)}>
-                <MentorForm setMentorFormDrawer={setMentorFormDrawer} tableData={tableData} setTableData={setTableData} />
+                <MentorForm initialFormState={initialFormState} formData={formData} setFormData={setFormData}
+                            setMentorFormDrawer={setMentorFormDrawer} tableData={tableData}
+                            setTableData={setTableData}/>
             </Drawer>
             <Drawer
                 key="tasks" title="Tasks Form"
