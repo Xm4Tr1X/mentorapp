@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Card, Row, Col, Table, Button, Drawer, Divider} from 'antd'
 import {fetchMentors, deleteMentor, editMentor} from '../actions/mentors'
 import MentorForm from './MentorForm'
-
+import Tasks from './tasks/Tasks'
 
 export default function Mentors() {
     const initialFormState = {name: '', topic: '', id: 0};
@@ -21,7 +21,7 @@ export default function Mentors() {
                         <Divider type="vertical"/>
                         <a key="delete" onClick={(e) => handleDelete(e, id)}>Delete</a>
                         <Divider type="vertical"/>
-                        <a key="view">Tasks</a>
+                        <a key="view" onClick={(e) => handleTasks(e, id)}>Tasks</a>
                     </React.Fragment>
                 )
             }
@@ -43,6 +43,11 @@ export default function Mentors() {
         setMentorFormDrawer(true);
     };
 
+    const handleTasks = (e, id) => {
+        e.preventDefault();
+        setTasksDrawer(true);
+    }
+
     return (
         <React.Fragment>
             <Row>
@@ -58,6 +63,7 @@ export default function Mentors() {
                 </Col>
             </Row>
             <Drawer
+                width="30%"
                 destroyOnClose={true}
                 key="mentors" title="Mentor Form"
                 visible={mentorFormDrawer}
@@ -67,10 +73,11 @@ export default function Mentors() {
                             setTableData={setTableData}/>
             </Drawer>
             <Drawer
+                width="70%"
                 key="tasks" title="Tasks Form"
                 visible={tasksDrawer}
                 onClose={() => setTasksDrawer(false)}>
-
+                <Tasks />
             </Drawer>
         </React.Fragment>
     );
