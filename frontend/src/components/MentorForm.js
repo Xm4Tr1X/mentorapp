@@ -40,7 +40,8 @@ const MentorForm = (props) => {
             </Form.Item>
             <Form.Item validateStatus={topicError ? 'error' : ''} help={topicError || ''}>
                 {getFieldDecorator('topic', {
-                    rules: [{ required: true, message: 'Please enter topic!' }]
+                    rules: [{ required: true, message: 'Please enter topic!' }],
+                    initialValue: props.formData.topic
                 })(
                     <Input
                         type="text"

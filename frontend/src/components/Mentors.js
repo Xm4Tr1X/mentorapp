@@ -1,26 +1,31 @@
-import React, {useEffect, useState} from 'react';
-import {Card, Row, Col, Table, Button, Drawer, Divider} from 'antd'
-import {fetchMentors, deleteMentor, editMentor} from '../actions/mentors'
+import React, { useEffect, useState } from 'react';
+import { Card, Row, Col, Table, Button, Drawer, Divider, Popconfirm } from 'antd'
+import { fetchMentors, deleteMentor, editMentor } from '../actions/mentors'
 import MentorForm from './MentorForm'
 import Tasks from './tasks/Tasks'
 
 export default function Mentors() {
-    const initialFormState = {name: '', topic: '', id: 0};
+    const initialFormState = { name: '', topic: '', id: 0 };
     const [tasksDrawer, setTasksDrawer] = useState(false);
     const [mentorFormDrawer, setMentorFormDrawer] = useState(false);
     const [tableData, setTableData] = useState([]);
     const [formData, setFormData] = useState(initialFormState);
+    const [mentorId, setMentorId] = useState('');
     const columns = [
-        {title: "Name", dataIndex: "name"},
-        {title: "Topic", dataIndex: 'topic'},
+        { title: "Name", dataIndex: "name" },
+        { title: "Topic", dataIndex: 'topic' },
         {
             title: "Actions", dataIndex: "_id", render: (id) => {
                 return (
                     <React.Fragment>
                         <a key="edit" onClick={(e) => handleEdit(e, id)}> Edit </a>
-                        <Divider type="vertical"/>
-                        <a key="delete" onClick={(e) => handleDelete(e, id)}>Delete</a>
-                        <Divider type="vertical"/>
+                        <Divider type="vertical" />
+                        <Popconfirm title="Are you sure？"
+                         okText="Yes" cancelText="No"
+                         onConfirm={(e) => handleDelete(e, id)}>
+                            <a key="delete">Delete</a>
+                        </Popconfirm>
+                        <Divider type="vertical" />
                         <a key="view" onClick={(e) => handleTasks(e, id)}>Tasks</a>
                     </React.Fragment>
                 )
@@ -46,6 +51,7 @@ export default function Mentors() {
     const handleTasks = (e, id) => {
         e.preventDefault();
         setTasksDrawer(true);
+        setMentorId(id);
     }
 
     return (
@@ -69,15 +75,17 @@ export default function Mentors() {
                 visible={mentorFormDrawer}
                 onClose={() => setMentorFormDrawer(false)}>
                 <MentorForm initialFormState={initialFormState} formData={formData} setFormData={setFormData}
-                            setMentorFormDrawer={setMentorFormDrawer} tableData={tableData}
-                            setTableData={setTableData}/>
+                    setMentorFormDrawer={setMentorFormDrawer} tableData={tableData}
+                    setTableData={setTableData} />
             </Drawer>
             <Drawer
                 width="70%"
                 key="tasks" title="Tasks Form"
                 visible={tasksDrawer}
-                onClose={() => setTasksDrawer(false)}>
-                <Tasks />
+                onClose={() => setTasksDrawer(false)}
+                destroyOnClose={true}
+                >
+                <Tasks mentorId={mentorId} />
             </Drawer>
         </React.Fragment>
     );
